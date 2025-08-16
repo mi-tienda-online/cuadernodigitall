@@ -1,0 +1,358 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Libreta de Apuntes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .notebook-lines {
+            background: white;
+        }
+        
+        .red-margin {
+            border-left: 2px solid #ef4444;
+            margin-left: 40px;
+            padding-left: 15px;
+        }
+        
+        .editor-content {
+            line-height: 25px;
+            min-height: 500px;
+            outline: none;
+            padding-top: 20px;
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { 
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .container { 
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .notebook-lines {
+                background: white !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            .editor-content { 
+                background: transparent !important;
+                box-shadow: none !important;
+                padding: 20px !important;
+                margin: 0 !important;
+                min-height: 100vh !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .editor-content * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .red-margin {
+                border-left: 2px solid #cc0000 !important;
+                margin-left: 40px !important;
+                padding-left: 15px !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto p-4 max-w-4xl">
+        <!-- Header -->
+        <div class="bg-white rounded-t-lg shadow-lg p-4 no-print">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">📝 Mi Libreta de Apuntes</h1>
+            
+            <!-- Toolbar -->
+            <div class="flex flex-wrap gap-2 items-center justify-center mb-4">
+                <!-- Font Family -->
+                <select id="fontFamily" class="px-3 py-1 border rounded text-sm">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Comic Sans MS">Comic Sans MS</option>
+                    <option value="Impact">Impact</option>
+                </select>
+                
+                <!-- Font Size -->
+                <select id="fontSize" class="px-3 py-1 border rounded text-sm">
+                    <option value="12px">12px</option>
+                    <option value="14px">14px</option>
+                    <option value="16px" selected>16px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                    <option value="24px">24px</option>
+                </select>
+                
+                <!-- Font Color -->
+                <select id="fontColor" class="px-3 py-1 border rounded text-sm">
+                    <option value="#000000">Negro</option>
+                    <option value="#dc2626">Rojo</option>
+                    <option value="#2563eb">Azul</option>
+                    <option value="#16a34a">Verde</option>
+                    <option value="#ca8a04">Amarillo</option>
+                    <option value="#9333ea">Morado</option>
+                    <option value="#ea580c">Naranja</option>
+                    <option value="#6b7280">Gris</option>
+                </select>
+                
+                <!-- Format Buttons -->
+                <button id="boldBtn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-bold">B</button>
+                <button id="italicBtn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm italic">I</button>
+                <button id="underlineBtn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm underline">U</button>
+                
+                <!-- Action Buttons -->
+                <button id="clearBtn" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm">🗑️ Limpiar</button>
+                <button id="saveBtn" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm">💾 Guardar</button>
+                <input type="file" id="loadFile" accept=".txt" class="hidden">
+                <button id="loadBtn" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm">📁 Cargar</button>
+                <button id="printBtn" class="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded text-sm">🖨️ Imprimir</button>
+            </div>
+        </div>
+        
+        <!-- Notebook Paper -->
+        <div class="bg-white shadow-lg notebook-lines relative">
+            <!-- Holes -->
+            <div class="absolute left-4 top-8 w-4 h-4 bg-gray-100 rounded-full border-2 border-gray-300 no-print"></div>
+            <div class="absolute left-4 top-24 w-4 h-4 bg-gray-100 rounded-full border-2 border-gray-300 no-print"></div>
+            <div class="absolute left-4 top-40 w-4 h-4 bg-gray-100 rounded-full border-2 border-gray-300 no-print"></div>
+            
+            <!-- Editor Area -->
+            <div 
+                id="editor" 
+                class="editor-content red-margin p-4 pt-8"
+                contenteditable="true"
+                style="font-family: Arial; font-size: 16px; color: #000000;"
+                placeholder="Escribe tus apuntes aquí..."
+            ></div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="bg-white rounded-b-lg shadow-lg p-2 text-center text-sm text-gray-500 no-print">
+            <span id="autoSaveStatus">Auto-guardado activado ✅</span>
+        </div>
+    </div>
+
+    <script>
+        class NotebookApp {
+            constructor() {
+                this.editor = document.getElementById('editor');
+                this.autoSaveKey = 'notebook-content';
+                this.autoSaveInterval = null;
+                this.init();
+            }
+            
+            init() {
+                this.loadFromStorage();
+                this.setupEventListeners();
+                this.startAutoSave();
+                this.setPlaceholder();
+            }
+            
+            setupEventListeners() {
+                // Font controls
+                document.getElementById('fontFamily').addEventListener('change', (e) => {
+                    this.applyStyle('fontFamily', e.target.value);
+                });
+                
+                document.getElementById('fontSize').addEventListener('change', (e) => {
+                    this.applyStyle('fontSize', e.target.value);
+                });
+                
+                document.getElementById('fontColor').addEventListener('change', (e) => {
+                    this.applyStyle('color', e.target.value);
+                });
+                
+                // Format buttons
+                document.getElementById('boldBtn').addEventListener('click', () => {
+                    this.toggleFormat('bold');
+                });
+                
+                document.getElementById('italicBtn').addEventListener('click', () => {
+                    this.toggleFormat('italic');
+                });
+                
+                document.getElementById('underlineBtn').addEventListener('click', () => {
+                    this.toggleFormat('underline');
+                });
+                
+                // Action buttons
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.clearContent();
+                });
+                
+                document.getElementById('saveBtn').addEventListener('click', () => {
+                    this.saveAsFile();
+                });
+                
+                document.getElementById('loadBtn').addEventListener('click', () => {
+                    document.getElementById('loadFile').click();
+                });
+                
+                document.getElementById('loadFile').addEventListener('change', (e) => {
+                    this.loadFile(e.target.files[0]);
+                });
+                
+                document.getElementById('printBtn').addEventListener('click', () => {
+                    this.printContent();
+                });
+                
+                // Editor events
+                this.editor.addEventListener('input', () => {
+                    this.updatePlaceholder();
+                });
+                
+                this.editor.addEventListener('focus', () => {
+                    this.updatePlaceholder();
+                });
+                
+                this.editor.addEventListener('blur', () => {
+                    this.updatePlaceholder();
+                });
+            }
+            
+            applyStyle(property, value) {
+                if (property === 'color') {
+                    const selection = window.getSelection();
+                    if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                        // Apply color to selected text
+                        document.execCommand('foreColor', false, value);
+                    } else {
+                        // Set color for new text by creating a span
+                        const span = document.createElement('span');
+                        span.style.color = value;
+                        span.innerHTML = '&nbsp;';
+                        
+                        const range = selection.getRangeAt(0);
+                        range.insertNode(span);
+                        range.setStartAfter(span);
+                        range.setEndAfter(span);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        
+                        // Set default color for editor
+                        this.editor.style.color = value;
+                    }
+                } else {
+                    this.editor.style[property] = value;
+                }
+                this.editor.focus();
+            }
+            
+            toggleFormat(command) {
+                document.execCommand(command, false, null);
+                this.editor.focus();
+            }
+            
+            clearContent() {
+                if (confirm('¿Estás seguro de que quieres limpiar todo el contenido?')) {
+                    this.editor.innerHTML = '';
+                    this.updatePlaceholder();
+                    this.saveToStorage();
+                }
+            }
+            
+            saveAsFile() {
+                const content = this.editor.innerText || this.editor.textContent;
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `apuntes_${new Date().toISOString().split('T')[0]}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showStatus('Archivo guardado exitosamente 💾');
+            }
+            
+            loadFile(file) {
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.editor.innerHTML = e.target.result.replace(/\n/g, '<br>');
+                    this.updatePlaceholder();
+                    this.saveToStorage();
+                    this.showStatus('Archivo cargado exitosamente 📁');
+                };
+                reader.readAsText(file);
+            }
+            
+            printContent() {
+                window.print();
+            }
+            
+            saveToStorage() {
+                localStorage.setItem(this.autoSaveKey, this.editor.innerHTML);
+            }
+            
+            loadFromStorage() {
+                const saved = localStorage.getItem(this.autoSaveKey);
+                if (saved) {
+                    this.editor.innerHTML = saved;
+                    this.updatePlaceholder();
+                }
+            }
+            
+            startAutoSave() {
+                this.autoSaveInterval = setInterval(() => {
+                    this.saveToStorage();
+                }, 3000); // Auto-save every 3 seconds
+            }
+            
+            setPlaceholder() {
+                if (!this.editor.innerHTML.trim()) {
+                    this.editor.innerHTML = '<span style="color: #9ca3af; font-style: italic;">Escribe tus apuntes aquí...</span>';
+                }
+            }
+            
+            updatePlaceholder() {
+                const placeholder = this.editor.querySelector('span[style*="color: #9ca3af"]');
+                if (placeholder && this.editor.innerHTML.trim() !== placeholder.outerHTML) {
+                    if (placeholder) placeholder.remove();
+                } else if (!this.editor.innerHTML.trim() || this.editor.innerHTML === '<br>') {
+                    this.setPlaceholder();
+                }
+            }
+            
+            showStatus(message) {
+                const status = document.getElementById('autoSaveStatus');
+                const original = status.textContent;
+                status.textContent = message;
+                status.className = 'text-green-600 font-semibold';
+                
+                setTimeout(() => {
+                    status.textContent = original;
+                    status.className = '';
+                }, 2000);
+            }
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            new NotebookApp();
+        });
+        
+        // Handle placeholder click
+        document.addEventListener('click', (e) => {
+            if (e.target.style.color === 'rgb(156, 163, 175)') {
+                const editor = document.getElementById('editor');
+                editor.innerHTML = '';
+                editor.focus();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96fce34117e8474e',t:'MTc1NTMwNDkwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
